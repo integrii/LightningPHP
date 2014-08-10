@@ -26,7 +26,7 @@ LightningPHP is made up of a few core componets.  There are as few as possible t
 - Libraries ``$this->loadLibrary('')``
 - Configs ``$this->loadConfig('')`` and ``$this->getConfig('')``
 
-Each type of componet has its own folder at the root level.  Learn more [on the wiki](https://github.com/integrii/LightningPHP/wiki/Command-Index).
+Each type of componet has its own folder at the root level.  Learn more [on the wiki](https://github.com/integrii/LightningPHP/wiki/Command-List).
 
 
 ## Example Application
