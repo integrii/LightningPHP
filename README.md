@@ -21,10 +21,9 @@ You probably **do** want to use LightningPHP if you are someone who:
 ## What makes it so fast?
 - It is written in just a single class!
 - Loaded models and libraries do not load other models or libraries until you explicitly ask for them.
-- No features are available by default - not even MySQL support.
 - Child classes only load a pointer if a model or library has been constructed previously.
-- The framework does not assume you want anything loaded by default.
-- The framework uses defines instead of variable substitution.
+- The framework does not assume you want anything loaded by default - not even MySQL support.
+- The framework uses static defines instead of variable substitution.
 
 
 ## Core Componets
