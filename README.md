@@ -19,7 +19,7 @@ You probably **do** want to use LightningPHP if you are someone who:
 
 
 ## What makes it so fast?
-- It is done with just a single class!
+- It is written in just a single class!
 - Loaded models and libraries do not load other models or libraries until you explicitly ask for them.
 - No features are available by default - not even MySQL support.
 - Child classes only load a pointer if a model or library has been constructed previously.
