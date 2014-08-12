@@ -18,6 +18,15 @@ You probably **do** want to use LightningPHP if you are someone who:
 - Dislikes framework specific learning.
 
 
+## What makes it so fast?
+- It is done with just a single class!
+- Loaded models and libraries do not load other models or libraries until you explicitly ask for them.
+- No features are available by default - not even MySQL support.
+- Child classes only load a pointer if a model or library has been constructed previously.
+- The framework does not assume you want anything loaded by default.
+- The framework uses defines instead of variable substitution.
+
+
 ## Core Componets
 LightningPHP is made up of a few core componets.  There are as few as possible to keep things simple.  
 - Models ``$this->loadModel('')``
