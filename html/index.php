@@ -205,7 +205,7 @@ class LightningPHP {
 		}
 
 		// Include library class
-		require_once(LIBRARYPATH."$library.php");
+		require_once(LIBRARYPATH."$library/$library.php");
 
 
 		// Initialize library
