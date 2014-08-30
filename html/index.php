@@ -55,20 +55,32 @@ define('INDEX', pathinfo(__FILE__, PATHINFO_BASENAME) );
 global $_LightningRequest;
 
 
-// Parse request URL into a controller, model and arguments so we can act on it.
-$_LightningRequest = pathinfo($_SERVER['REQUEST_URI']);
-$_LightningRequest = $_LightningRequest['dirname'].'/'.$_LightningRequest['basename'];
-if( strpos($_LightningRequest,'?') !== FALSE ) {
-	$_LightningRequest = explode('?',$_LightningRequest);
-	$_LightningRequest = $_LightningRequest[0];
+// Check for REQUEST_URI input (a web request)
+if(isset($_SERVER['REQUEsET_URI'])){
+	// Parse request URL into a controller, model and arguments so we can act on it.
+	$_LightningRequest = pathinfo($_SERVER['REQUEST_URI']);
+	$_LightningRequest = $_LightningRequest['dirname'].'/'.$_LightningRequest['basename'];
+	if( strpos($_LightningRequest,'?') !== FALSE ) {
+		$_LightningRequest = explode('?',$_LightningRequest);
+		$_LightningRequest = $_LightningRequest[0];
+	}
+	$_LightningRequest = explode('/',$_LightningRequest);
+	$_LightningRequest = array_filter($_LightningRequest);
+	$_LightningRequest = array_values($_LightningRequest);
+} else {
+	// In the case that we don't have a web request, check for HHVM CLI input variables
+	if(isset($argv[0])){
+		// Offset the argv data so it fits into our existing request parsing logic
+		$_LightningRequest = array_slice($argv,1);
+	} else {
+		include( APPPATH.'404.php' );
+		exit;
+	}
 }
-$_LightningRequest = explode('/',$_LightningRequest);
-$_LightningRequest = array_filter($_LightningRequest);
-$_LightningRequest = array_values($_LightningRequest);
 
 
 
-// Determine the controller to use
+// Determine the controller to load and use
 if( isset( $_LightningRequest[0] ) ) {
 	$_LightningRequest[0] = rtrim( $_LightningRequest[0], "/ ");
 	if( !empty( $_LightningRequest[0] ) ) {
@@ -78,7 +90,7 @@ if( isset( $_LightningRequest[0] ) ) {
 	$_LightningController = $_LightningDefaultController;
 }
 
-// Determine the function to use
+// Determine the function to use in the requested controller
 if( isset( $_LightningRequest[1] ) ) {
 
 	$_LightningRequest[1] = rtrim( $_LightningRequest[1], "/ ");
@@ -106,11 +118,15 @@ class LightningPHP {
 
 	// This function returns the requested class from our list of loaded classes.
 	// New classes are loaded as needed.
-	public function &loadClass($className,$attributes=array()) {
+	public function &loadClass($className,$attributes = array(),$overrideClass = NULL) {
 
 		// If we have not yet loaded this class, do so now
 		if(!isset(self::$_LightningClasses[$className])){
-			self::$_LightningClasses[$className] = new $className($attributes);
+			if(isset($overrideClass)){
+				self::$_LightningClasses[$className] = new $overrideClass($attributes);
+			} else {
+				self::$_LightningClasses[$className] = new $className($attributes);
+			}
 		}
 
 		// Return the class we just created in our static classes array
@@ -198,7 +214,7 @@ class LightningPHP {
 
 
 	// LIBRARY LOADER
-	public function loadLibrary( $library,$arguments = array() ) {
+	public function loadLibrary( $library,$arguments = array(),$overrideClass = NULL) {
 
 		if( empty ( $library ) ) {
 			return;
@@ -209,7 +225,7 @@ class LightningPHP {
 
 
 		// Initialize library
-		$this->$library =& $this->loadClass($library,$arguments);
+		$this->$library =& $this->loadClass($library,$arguments,$overrideClass);
 	}
 
 
