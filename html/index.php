@@ -56,7 +56,7 @@ global $_LightningRequest;
 
 
 // Check for REQUEST_URI input (a web request)
-if(isset($_SERVER['REQUEsET_URI'])){
+if(isset($_SERVER['REQUEST_URI'])){
 	// Parse request URL into a controller, model and arguments so we can act on it.
 	$_LightningRequest = pathinfo($_SERVER['REQUEST_URI']);
 	$_LightningRequest = $_LightningRequest['dirname'].'/'.$_LightningRequest['basename'];
