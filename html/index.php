@@ -190,24 +190,28 @@ class LightningPHP {
 	//  INPUT PARAMITER LOADER
 	public function loadArgs($arg = NULL) {
 
-		// read in global for user request
-		global $_LightningRequest;
+			// read in global for user request
+			global $_LightningRequest;
 
-		// if only a single paramiter is requested, only supply it
-		if($arg !== NULL) {
-			$arg = $arg + 2;
-			$args = array_slice($_LightningRequest,$arg);
-			$args = $args[0];
-		} else {
-			// offset requested arg for our input string parsing
-			$args = array_slice($_LightningRequest,3);
-		}
+			// if only a single paramiter is requested, only supply it
+			if($arg !== NULL) {
+					$arg = $arg + 2;
+					$args = array_slice($_LightningRequest,$arg);
+					if(isset($args[0])){
+							$args = $args[0];
+					} else {
+							$args = '';
+					}
+			} else {
+					// offset requested arg for our input string parsing
+					$args = array_slice($_LightningRequest,3);
+			}
 
-		if( empty( $args ) ) {
-			$args = "";
-		}
+			if( empty( $args ) ) {
+					$args = '';
+			}
 
-		return $args;
+			return $args;
 	}
 
 
