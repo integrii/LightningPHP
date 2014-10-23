@@ -2,6 +2,8 @@
 ## What is LightningPHP?
 LightningPHP is a FAST, mega-lightweight MVC (Model, View, Controller) framework for PHP.  Unlike most every other framework available, LightningPHP includes next to nothing by default.  This is a minimal barebones MVC framework with no fluff, no complication, and no wasted processing time.  LightningPHP can have any PHP Class plugged in as a library or model without custom rewriting or special library versions.
 
+In my use case, using nginx, HHVM and LightningPHP resulted in a **15x speed increase** vs the same app with CodeIgniter and Apache!
+
 
 ## Who should use LightningPHP?
 If you are just looking to stand up a PHP website fast, LightningPHP is probably **not** the best framework for you.  You probably do **not** want to use LightningPHP if you are someone who:
