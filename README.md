@@ -1,4 +1,6 @@
 # Overview
+[![Code Climate](https://codeclimate.com/repos/54555f2a695680525f0800b6/badges/00b704f87ed1ba2dc745/gpa.svg)](https://codeclimate.com/repos/54555f2a695680525f0800b6/feed)
+
 ## What is LightningPHP?
 LightningPHP is a FAST, mega-lightweight MVC (Model, View, Controller) framework for PHP.  Unlike most every other framework available, LightningPHP includes next to nothing by default.  This is a minimal barebones MVC framework with no fluff, no complication, and no wasted processing time.  LightningPHP can have any PHP Class plugged in as a library or model without custom rewriting or special library versions.
 
