@@ -40,6 +40,10 @@ LightningPHP is made up of a few core componets.  There are as few as possible t
 
 Each type of componet has its own directory at the application root.  Learn more [on the wiki](https://github.com/integrii/LightningPHP/wiki/Command-List).
 
+## Get Started
+
+To get started using LightningPHP, download [the source for release 1](https://github.com/integrii/LightningPHP/archive/1.tar.gz) and unzip it to your PHP or HHVM web server webroot. When you start it up you will see a Welcoem to LightningPHP page that comes with a sample controller, model, view, config and library. Use these pages as templates to start coding your app!
+
 
 ## Example Application
 Check out a complete example LightningPHP application [here](https://github.com/integrii/LightningPHP/wiki/Example-Application).
