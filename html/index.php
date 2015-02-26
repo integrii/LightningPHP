@@ -57,48 +57,48 @@ global $_LightningRequest;
 
 // Check for REQUEST_URI input (a web request)
 if(isset($_SERVER['REQUEST_URI'])){
-	// Parse request URL into a controller, model and arguments so we can act on it.
-	$_LightningRequest = pathinfo($_SERVER['REQUEST_URI']);
-	$_LightningRequest = $_LightningRequest['dirname'].'/'.$_LightningRequest['basename'];
-	if( strpos($_LightningRequest,'?') !== FALSE ) {
-		$_LightningRequest = explode('?',$_LightningRequest);
-		$_LightningRequest = $_LightningRequest[0];
-	}
-	$_LightningRequest = explode('/',$_LightningRequest);
-	$_LightningRequest = array_filter($_LightningRequest);
-	$_LightningRequest = array_values($_LightningRequest);
+    // Parse request URL into a controller, model and arguments so we can act on it.
+    $_LightningRequest = pathinfo($_SERVER['REQUEST_URI']);
+    $_LightningRequest = $_LightningRequest['dirname'].'/'.$_LightningRequest['basename'];
+    if( strpos($_LightningRequest,'?') !== FALSE ) {
+        $_LightningRequest = explode('?',$_LightningRequest);
+        $_LightningRequest = $_LightningRequest[0];
+    }
+    $_LightningRequest = explode('/',$_LightningRequest);
+    $_LightningRequest = array_filter($_LightningRequest);
+    $_LightningRequest = array_values($_LightningRequest);
 } else {
-	// In the case that we don't have a web request, check for HHVM CLI input variables
-	if(isset($argv[0])){
-		// Offset the argv data so it fits into our existing request parsing logic
-		$_LightningRequest = array_slice($argv,1);
-	} else {
-		include( APPPATH.'404.php' );
-		exit;
-	}
+    // In the case that we don't have a web request, check for HHVM CLI input variables
+    if(isset($argv[0])){
+        // Offset the argv data so it fits into our existing request parsing logic
+        $_LightningRequest = array_slice($argv,1);
+    } else {
+        include( APPPATH.'404.php' );
+        exit;
+    }
 }
 
 
 
 // Determine the controller to load and use
 if( isset( $_LightningRequest[0] ) ) {
-	$_LightningRequest[0] = rtrim( $_LightningRequest[0], "/ ");
-	if( !empty( $_LightningRequest[0] ) ) {
-		$_LightningController = $_LightningRequest[0];
-	}
+    $_LightningRequest[0] = rtrim( $_LightningRequest[0], "/ ");
+    if( !empty( $_LightningRequest[0] ) ) {
+        $_LightningController = $_LightningRequest[0];
+    }
 } else {
-	$_LightningController = $_LightningDefaultController;
+    $_LightningController = $_LightningDefaultController;
 }
 
 // Determine the function to use in the requested controller
 if( isset( $_LightningRequest[1] ) ) {
 
-	$_LightningRequest[1] = rtrim( $_LightningRequest[1], "/ ");
-	if( !empty( $_LightningRequest[1] ) ) {
-		$_LightningFunction = $_LightningRequest[1];
-	}
+    $_LightningRequest[1] = rtrim( $_LightningRequest[1], "/ ");
+    if( !empty( $_LightningRequest[1] ) ) {
+        $_LightningFunction = $_LightningRequest[1];
+    }
 } else {
-	$_LightningFunction = $_LightningDefaultFunction;
+    $_LightningFunction = $_LightningDefaultFunction;
 }
 
 
@@ -109,157 +109,184 @@ if( isset( $_LightningRequest[1] ) ) {
 class LightningPHP {
 
 
-	// This is where application configuration is kept loaded
-	public static $_LightningConfig = array();
+    // This is where application configuration is kept loaded
+    public static $_LightningConfig = array();
 
-	// This is where the classes that have been loaded are stored
-	public static $_LightningClasses = array();
-
-
-	// This function returns the requested class from our list of loaded classes.
-	// New classes are loaded as needed.
-	public function &loadClass($className,$attributes = array(),$overrideClass = NULL) {
-
-		// If we have not yet loaded this class, do so now
-		if(!isset(self::$_LightningClasses[$className])){
-			if(isset($overrideClass)){
-				self::$_LightningClasses[$className] = new $overrideClass($attributes);
-			} else {
-				self::$_LightningClasses[$className] = new $className($attributes);
-			}
-		}
-
-		// Return the class we just created in our static classes array
-		return self::$_LightningClasses[$className];
-	}
+    // This is where the classes that have been loaded are stored
+    public static $_LightningClasses = array();
 
 
 
 
-	//  MODEL LOADER
-	public function loadModel( $model,$arguments = array() ) {
+        // This function returns the requested class from our list of loaded classes.
+        // New classes are loaded as needed. Existing ones are returned as pointers to their
+        // already instantiated object.
+        public function &loadClass($className,$attributes = array(),$overrideClass = NULL) {
 
-		if( empty ( $model ) ) {
-			return;
-		}
+                // if the class is already loaded in this class, return that class reference
+                if(isset(self::$_LightningClasses[$className])){
+                        return self::$_LightningClasses[$className];
+                }
 
-		require_once(MODELPATH."$model.php");
+                // Check if we have a parent class to load class pointers from
+                if(get_parent_class() === FALSE){
 
-		// Initialize model
-		$this->$model =& $this->loadClass($model,$arguments);
-	}
+                        // class load logic for parent class
+                        if(!isset(self::$_LightningClasses[$className])){
+                                if(isset($overrideClass)){
+                                        self::$_LightningClasses[$className] = new $overrideClass($attributes);
+                                } else {
+                                        self::$_LightningClasses[$className] = new $className($attributes);
+                                }
+                        }
 
+                } else {
 
+                        // class load logic for child classes
+                        if(!isset(parent::$_LightningClasses[$className])){
+                                if(isset($overrideClass)){
+                                        parent::$_LightningClasses[$className] = new $overrideClass($attributes);
+                                } else {
+                                        parent::$_LightningClasses[$className] = new $className($attributes);
+                                }
+                        }
 
-	// VIEW LOADER
-	public function loadView( $view,$content = array() ) {
+                        self::$_LightningClasses[$className] =& parent::$_LightningClasses[$className];
 
-		// Return if no view passed
-		if( empty($view) ) {
-			return;
-		}
+                }
 
-		// Break our content array out into variables before running our view include
-		if( ! empty ( $content ) && is_array( $content ) ) {
-			extract( $content );
-		}
-
-		// Include view 
-		include(VIEWPATH."$view.php");
-
-	}
-
-
-
-	// CONTROLLER LOADER
-	public function loadController( $controller,$arguments = array() ) {
-
-		if( empty ( $controller ) ) {
-			return;
-		}
-
-		// Include controller class
-		require_once(CONTROLLERPATH."$controller.php");
-
-		// Initialize controller
-		$this->$controller =& $this->loadClass($controller,$arguments);
-	}
-
-
-
-	//  INPUT PARAMITER LOADER
-	public function loadArgs($arg = NULL) {
-
-			// read in global for user request
-			global $_LightningRequest;
-
-			// if only a single paramiter is requested, only supply it
-			if($arg !== NULL) {
-					$arg = $arg + 2;
-					$args = array_slice($_LightningRequest,$arg);
-					if(isset($args[0])){
-							$args = $args[0];
-					} else {
-							$args = '';
-					}
-			} else {
-					// offset requested arg for our input string parsing
-					$args = array_slice($_LightningRequest,3);
-			}
-
-			if( empty( $args ) ) {
-					$args = '';
-			}
-
-			return $args;
-	}
+                // Return the class we just created in our static classes array
+                return self::$_LightningClasses[$className];
+        }
 
 
 
 
-	// LIBRARY LOADER
-	public function loadLibrary( $library,$arguments = array(),$overrideClass = NULL) {
 
-		if( empty ( $library ) ) {
-			return;
-		}
+    //  MODEL LOADER
+    public function loadModel( $model,$arguments = array() ) {
 
-		// Include library class
-		require_once(LIBRARYPATH."$library/$library.php");
+        if( empty ( $model ) ) {
+            return;
+        }
 
+        require_once(MODELPATH."$model.php");
 
-		// Initialize library
-		$this->$library =& $this->loadClass($library,$arguments,$overrideClass);
-	}
-
-
-
-	// CONFIGURATION FILE LOADER
-	public function loadConfig($configFile) {
-
-		if( empty ( $configFile ) ) {
-			return;
-		}
-
-		// Include config class
-		include(CONFIGPATH."$configFile.php");
-
-		foreach($config as $configItem => $configValue){
-			$this->_LightningConfig[$configItem] = $configValue;
-		}
-	}
+        // Initialize model
+        $this->$model =& $this->loadClass($model,$arguments);
+    }
 
 
 
-	// CONFIGURATION SETTING LOADER
-	public function getConfig($configItem) {
+    // VIEW LOADER
+    public function loadView( $view,$content = array() ) {
 
-		if( ! empty ( $this->_LightningConfig[$configItem] ) ) {
+        // Return if no view passed
+        if( empty($view) ) {
+            return;
+        }
 
-			return $this->_LightningConfig[$configItem];
-		}
+        // Break our content array out into variables before running our view include
+        if( ! empty ( $content ) && is_array( $content ) ) {
+            extract( $content );
+        }
 
-	}
+        // Include view
+        include(VIEWPATH."$view.php");
+
+    }
+
+
+
+    // CONTROLLER LOADER
+    public function loadController( $controller,$arguments = array() ) {
+
+        if( empty ( $controller ) ) {
+            return;
+        }
+
+        // Include controller class
+        require_once(CONTROLLERPATH."$controller.php");
+
+        // Initialize controller
+        $this->$controller =& $this->loadClass($controller,$arguments);
+    }
+
+
+
+    //  INPUT PARAMITER LOADER
+    public function loadArgs($arg = NULL) {
+
+            // read in global for user request
+            global $_LightningRequest;
+
+            // if only a single paramiter is requested, only supply it
+            if($arg !== NULL) {
+                    $arg = $arg + 2;
+                    $args = array_slice($_LightningRequest,$arg);
+                    if(isset($args[0])){
+                            $args = $args[0];
+                    } else {
+                            $args = '';
+                    }
+            } else {
+                    // offset requested arg for our input string parsing
+                    $args = array_slice($_LightningRequest,3);
+            }
+
+            if( empty( $args ) ) {
+                    $args = '';
+            }
+
+            return $args;
+    }
+
+
+
+
+    // LIBRARY LOADER
+    public function loadLibrary( $library,$arguments = array(),$overrideClass = NULL) {
+
+        if( empty ( $library ) ) {
+            return;
+        }
+
+        // Include library class
+        require_once(LIBRARYPATH."$library/$library.php");
+
+
+        // Initialize library
+        $this->$library =& $this->loadClass($library,$arguments,$overrideClass);
+    }
+
+
+
+    // CONFIGURATION FILE LOADER
+    public function loadConfig($configFile) {
+
+        if( empty ( $configFile ) ) {
+            return;
+        }
+
+        // Include config class
+        include(CONFIGPATH."$configFile.php");
+
+        foreach($config as $configItem => $configValue){
+            $this->_LightningConfig[$configItem] = $configValue;
+        }
+    }
+
+
+
+    // CONFIGURATION SETTING LOADER
+    public function getConfig($configItem) {
+
+        if( ! empty ( $this->_LightningConfig[$configItem] ) ) {
+
+            return $this->_LightningConfig[$configItem];
+        }
+
+    }
 
 
 }
@@ -268,21 +295,21 @@ class LightningPHP {
 $LightningPHP = new LightningPHP();
 
 
-// Load all autoload models 
+// Load all autoload models
 foreach ( $autoloadModels as $model ) {
-	$LightningPHP->loadModel($model);
+    $LightningPHP->loadModel($model);
 }
 
 // Load all autoload libraries
 foreach ( $autoloadLibraries as $library ) {
-	$LightningPHP->loadLibrary($library);
+    $LightningPHP->loadLibrary($library);
 }
 
 
 // Check if the requested controller exists
 if( file_exists( CONTROLLERPATH."$_LightningController.php" ) !== TRUE){
-	include( APPPATH.'404.php' );
-	exit;
+    include( APPPATH.'404.php' );
+    exit;
 }
 
 // Load requested controller
@@ -290,8 +317,8 @@ $LightningPHP->loadController($_LightningController);
 
 // Check if the requested model exists
 if( method_exists( $LightningPHP->$_LightningController, $_LightningFunction ) !== TRUE){
-	include( APPPATH.'404.php' );
-	exit;
+    include( APPPATH.'404.php' );
+    exit;
 }
 
 // If a function was specified, call that one.  Otherwise, call the default one
