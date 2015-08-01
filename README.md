@@ -8,18 +8,20 @@ In my use case, using nginx, HHVM and LightningPHP resulted in a **15x speed inc
 
 
 ## Who should use LightningPHP?
-If you are just looking to stand up a PHP website fast, LightningPHP is probably **not** the best framework for you.  You probably do **not** want to use LightningPHP if you are someone who:
 
-- Wants to use a large collection of pre-built functions.
-- Wants to stand up a PHP site as easily as possible.
-- Does not care about servicing thousands of requests per second.
-
-You probably **do** want to use LightningPHP if you are someone who:
+You will love LightningPHP if you are someone who:
 
 - Likes to keep things simple.
 - Wants an *extremely* fast application.
 - Wants to be able to use whatever libraries they want without rewriting them.
 - Dislikes framework specific learning.
+
+If you are just looking to stand up a PHP website without much work, LightningPHP is probably not the best framework for you.  You probably do not want to use LightningPHP if you are someone who:
+
+- Wants to use a large collection of pre-built functions.
+- Wants to stand up a PHP site as quickly as possible.
+- Does not care about servicing hundreds or thousands of requests per second.
+
 
 
 ## What makes it so fast?
