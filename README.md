@@ -44,7 +44,7 @@ Each type of componet has its own directory at the application root.  Learn more
 
 ## Get Started
 
-To get started using LightningPHP, download [the source for release 1](https://github.com/integrii/LightningPHP/archive/HEAD.tar.gz) and unzip it to your PHP or HHVM web server webroot. When you start it up you will see a 'Welcome to LightningPHP' page that comes with a sample controller, model, view, config and library. Use these pages as templates to start coding your app!
+To get started using LightningPHP, download [the latest release](https://github.com/integrii/LightningPHP/archive/HEAD.tar.gz) and unzip it to your PHP or HHVM web server webroot. When you start it up you will see a 'Welcome to LightningPHP' page that comes with a sample controller, model, view, config and library. Use these pages as templates to start coding your app!
 
 
 ## Example Application
