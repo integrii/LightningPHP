@@ -15,16 +15,19 @@ define('CONTROLLERPATH', '/var/www/html/controllers/');
 define('LIBRARYPATH', '/var/www/html/libraries/');
 // This is where your config php files go
 define('CONFIGPATH', '/var/www/html/configs/');
+// NOTE: In PHP7, these autoload lists can be moved to arrays
+// This is the array of models we will load on every render
+define('AUTOLOADMODELS', '');
+// This is the array of libraries we will load on every render
+define('AUTOLOADLIBRARIES', '');
+// This is the array of configuration files we will load on every render
+define('AUTOLOADCONFIGS', '');
+
+
 // This is the default controller we will call if none is specified
 $_LightningDefaultController = 'main';
 // This is the default function we call on your contollers if none is speicifed
 $_LightningDefaultFunction = 'main';
-// This is the array of models we will load on every render
-$autoloadModels = array('');
-// This is the array of libraries we will load on every render
-$autoloadLibraries = array('');
-// This is the array of configuration files we will load on every render
-$autoloadConfigs = array('');
 
 
 //
@@ -118,52 +121,82 @@ class LightningPHP {
 
 
 
-        // This function returns the requested class from our list of loaded classes.
-        // New classes are loaded as needed. Existing ones are returned as pointers to their
-        // already instantiated object.
-        public function &loadClass($className,$attributes = array(),$overrideClass = NULL) {
+    // This enables LightningPHP to load classes each time it is subclassed
+    function __construct(){
 
-                // if the class is already loaded in this class, return that class reference
-                if(isset(self::$_LightningClasses[$className])){
-                        return self::$_LightningClasses[$className];
-                }
-
-                // Check if we have a parent class to load class pointers from
-                if(get_parent_class() === FALSE){
-
-                        // class load logic for parent class
-                        if(!isset(self::$_LightningClasses[$className])){
-                                if(isset($overrideClass)){
-                                        self::$_LightningClasses[$className] = new $overrideClass($attributes);
-                                } else {
-                                        self::$_LightningClasses[$className] = new $className($attributes);
-                                }
-                        }
-
-                } else {
-
-                        // class load logic for child classes
-                        if(!isset(parent::$_LightningClasses[$className])){
-                                if(isset($overrideClass)){
-                                        parent::$_LightningClasses[$className] = new $overrideClass($attributes);
-                                } else {
-                                        parent::$_LightningClasses[$className] = new $className($attributes);
-                                }
-                        }
-
-                        self::$_LightningClasses[$className] =& parent::$_LightningClasses[$className];
-
-                }
-
-                // Return the class we just created in our static classes array
-                return self::$_LightningClasses[$className];
+        // Load all autoload models 
+        if(strlen(AUTOLOADMODELS) > 1){
+            $autoloadModels = explode(',',AUTOLOADMODELS);
+            foreach ( $autoloadModels as $model ) {
+                $this->loadModel($model);
+            }
         }
 
+        // Load all autoload libraries
+        if(strlen(AUTOLOADLIBRARIES) > 1){
+            $autoloadLibraries = explode(',',AUTOLOADLIBRARIES);
+            foreach ( $autoloadLibraries as $library ) {                                                                                                                 
+                $this->loadLibrary($library);
+            }
+        }
+
+        // Load all autoload configs
+        if(strlen(AUTOLOADCONFIGS) > 1){
+            $autoloadConfigs = explode(',',AUTOLOADCONFIGS);
+            foreach ( $autoloadConfigs as $config ) {
+                $this->loadConfig($config);
+            }
+        }
+
+    }
+
+
+	// This function returns the requested class from our list of loaded classes.
+	// New classes are loaded as needed. Existing ones are returned as pointers to their
+	// already instantiated object.
+	public function &loadClass($className,$attributes = array(),$overrideClass = NULL) {
+
+			// if the class is already loaded in this class, return that class reference
+			if(isset(self::$_LightningClasses[$className])){
+					return self::$_LightningClasses[$className];
+			}
+
+			// Check if we have a parent class to load class pointers from
+			if(get_parent_class() === FALSE){
+
+					// class load logic for parent class
+					if(!isset(self::$_LightningClasses[$className])){
+							if(isset($overrideClass)){
+									self::$_LightningClasses[$className] = new $overrideClass($attributes);
+							} else {
+									self::$_LightningClasses[$className] = new $className($attributes);
+							}
+					}
+
+			} else {
+
+					// class load logic for child classes
+					if(!isset(parent::$_LightningClasses[$className])){
+							if(isset($overrideClass)){
+									parent::$_LightningClasses[$className] = new $overrideClass($attributes);
+							} else {
+									parent::$_LightningClasses[$className] = new $className($attributes);
+							}
+					}
+
+					self::$_LightningClasses[$className] =& parent::$_LightningClasses[$className];
+
+			}
+
+			// Return the class we just created in our static classes array
+			return self::$_LightningClasses[$className];
+	}
 
 
 
 
-    //  MODEL LOADER
+
+//  MODEL LOADER
     public function loadModel( $model,$arguments = array() ) {
 
         if( empty ( $model ) ) {
@@ -293,17 +326,6 @@ class LightningPHP {
 
 // Initialize LightningPHP
 $LightningPHP = new LightningPHP();
-
-
-// Load all autoload models
-foreach ( $autoloadModels as $model ) {
-    $LightningPHP->loadModel($model);
-}
-
-// Load all autoload libraries
-foreach ( $autoloadLibraries as $library ) {
-    $LightningPHP->loadLibrary($library);
-}
 
 
 // Check if the requested controller exists
