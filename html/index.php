@@ -150,53 +150,59 @@ class LightningPHP {
 
     }
 
+    // This function returns the requested class from our list of loaded classes.
+    // New classes are loaded as needed. Existing ones are returned as pointers to their
+    // already instantiated object.
+    public function &loadClass($className,$attributes = array(),$overrideClass = NULL) {
 
-	// This function returns the requested class from our list of loaded classes.
-	// New classes are loaded as needed. Existing ones are returned as pointers to their
-	// already instantiated object.
-	public function &loadClass($className,$attributes = array(),$overrideClass = NULL) {
+        // if the class is already loaded in this class, return that class reference
+        if(isset(self::$_LightningClasses[$className])){
+            return self::$_LightningClasses[$className];
+        }
 
-			// if the class is already loaded in this class, return that class reference
-			if(isset(self::$_LightningClasses[$className])){
-					return self::$_LightningClasses[$className];
-			}
+        // class load logic 
+        if(!isset(LightningPHP::$_LightningClasses[$className])){
+            if(isset($overrideClass)){
+                LightningPHP::$_LightningClasses[$className] = new $overrideClass($attributes);
+            } else {
+                LightningPHP::$_LightningClasses[$className] = new $className($attributes);
+            }
+            // Load all autoload models into subclass
+            if(strlen(AUTOLOADMODELS) > 1){
+                $autoloadModels = explode(',',AUTOLOADMODELS);
+                foreach ( $autoloadModels as $autoloadModel ) {
+                    LightningPHP::$_LightningClasses[$className]->$autoloadModel =& LightningPHP::$_LightningClasses[$autoloadModel];
+                }
+            }
+            // Load all autoload libraries into subclass
+            if(strlen(AUTOLOADLIBRARIES) > 1){
+                $autoloadLibraries = explode(',',AUTOLOADLIBRARIES);
+                foreach ( $autoloadLibraries as $autoloadLibrary ) {
+                    LightningPHP::$_LightningClasses[$className]->$autoloadLibrary =& LightningPHP::$_LightningClasses[$autoloadLibrary];
+                }
+            }
+            // Load all autoload configs into subclass
+            if(strlen(AUTOLOADCONFIGS) > 1){
+                $autoloadConfigs = explode(',',AUTOLOADCONFIGS);
+                foreach ( $autoloadConfigs as $autoloadConfig ) {
+                    LightningPHP::$_LightningClasses[$className]->loadConfig($autoloadConfig);
+                }
+            }
+        }
 
-			// Check if we have a parent class to load class pointers from
-			if(get_parent_class() === FALSE){
+        // Check if we have a parent class and create a pointer to it if we do
+        if(get_parent_class($this) !== FALSE){
+            self::$_LightningClasses[$className] =& LightningPHP::$_LightningClasses[$className];
+        }
 
-					// class load logic for parent class
-					if(!isset(self::$_LightningClasses[$className])){
-							if(isset($overrideClass)){
-									self::$_LightningClasses[$className] = new $overrideClass($attributes);
-							} else {
-									self::$_LightningClasses[$className] = new $className($attributes);
-							}
-					}
-
-			} else {
-
-					// class load logic for child classes
-					if(!isset(parent::$_LightningClasses[$className])){
-							if(isset($overrideClass)){
-									parent::$_LightningClasses[$className] = new $overrideClass($attributes);
-							} else {
-									parent::$_LightningClasses[$className] = new $className($attributes);
-							}
-					}
-
-					self::$_LightningClasses[$className] =& parent::$_LightningClasses[$className];
-
-			}
-
-			// Return the class we just created in our static classes array
-			return self::$_LightningClasses[$className];
-	}
+        // Return the class we just created in our static classes array
+        return self::$_LightningClasses[$className];
+    }
 
 
 
 
-
-//  MODEL LOADER
+	//  MODEL LOADER
     public function loadModel( $model,$arguments = array() ) {
 
         if( empty ( $model ) ) {
